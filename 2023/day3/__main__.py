@@ -7,8 +7,8 @@ def get_input(filename: str):
         return len(lines[0]) + 1, "." + ".".join(lines)
 
 
-def get_adjacent_positions(match: re.Match, line_len: int, inpt: str):
-    adjacents = []
+def get_adjacent_positions(match: re.Match[str], line_len: int, inpt: str):
+    adjacents: list[int] = []
 
     start = match.start()
     end = match.end()
@@ -48,7 +48,7 @@ def get_adjacent_positions(match: re.Match, line_len: int, inpt: str):
 
 
 def part1(line_len: int, inpt: str):
-    part_nums = []
+    part_nums: list[int] = []
 
     for match in re.finditer(r"\d+", inpt):
         adj_sym = [
@@ -65,7 +65,7 @@ def part1(line_len: int, inpt: str):
 
 def part2(line_len: int, inpt: str):
     gear_positions = [match.start() for match in re.finditer(r"\*", inpt)]
-    gears = {pos: [] for pos in gear_positions}
+    gears: dict[int, list[int]] = {pos: [] for pos in gear_positions}
 
     for match in re.finditer(r"\d+", inpt):
         for pos in get_adjacent_positions(match, line_len, inpt):
