@@ -3,6 +3,13 @@ def get_input(filename: str):
         return file.read().split("\n")
 
 
+def coloriter(game: str):
+    for game_set in game.split("; "):
+        for color_count in game_set.split(", "):
+            val_str, color = color_count.split(" ")
+            yield int(val_str), color
+
+
 def part1(input: list[str]):
     bag = {"red": 12, "green": 13, "blue": 14}
     valid: list[int] = []
@@ -10,15 +17,9 @@ def part1(input: list[str]):
     for i, game in enumerate(input):
         invalid = False
 
-        for game_set in game.split("; "):
-            for color_count in game_set.split(", "):
-                n, color = color_count.split(" ")
-
-                if bag[color] < int(n):
-                    invalid = True
-                    break
-
-            if invalid:
+        for val, color in coloriter(game):
+            if bag[color] < val:
+                invalid = True
                 break
 
         if not invalid:
@@ -33,13 +34,9 @@ def part2(input: list[str]):
     for game in input:
         bag = {"red": 0, "green": 0, "blue": 0}
 
-        for game_set in game.split("; "):
-            for color_count in game_set.split(", "):
-                n, color = color_count.split(" ")
-                n = int(n)
-
-                if n > bag[color]:
-                    bag[color] = n
+        for val, color in coloriter(game):
+            if val > bag[color]:
+                bag[color] = val
 
         powers.append(bag["red"] * bag["green"] * bag["blue"])
 
