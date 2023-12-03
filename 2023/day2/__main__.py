@@ -1,14 +1,11 @@
-from pprint import pprint
-
-
 def get_input(filename: str):
     with open(filename, "r") as file:
         return file.read().split("\n")
 
 
-def part1(input: str):
+def part1(input: list[str]):
     bag = {"red": 12, "green": 13, "blue": 14}
-    valid = []
+    valid: list[int] = []
 
     for i, game in enumerate(input):
         invalid = False
@@ -30,15 +27,8 @@ def part1(input: str):
     return sum(valid)
 
 
-example1 = get_input("day2/example1.txt")
-print(part1(example1))
-
-final_input = get_input("day2/final_input.txt")
-print(part1(final_input))
-
-
-def part2(input: str):
-    powers = []
+def part2(input: list[str]):
+    powers: list[int] = []
 
     for game in input:
         bag = {"red": 0, "green": 0, "blue": 0}
@@ -57,7 +47,10 @@ def part2(input: str):
 
 
 example1 = get_input("day2/example1.txt")
-print(part2(example1))
+assert part1(example1) == 8
+assert part2(example1) == 2286
+
 
 final_input = get_input("day2/final_input.txt")
-print(part2(final_input))
+assert part1(final_input) == 2545
+assert part2(final_input) == 78111
