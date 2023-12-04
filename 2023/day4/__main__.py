@@ -55,7 +55,7 @@ def part2(inpts: list[tuple[int, str, str]]) -> int:
     cards: dict[int, Card] = {int(p): Card(p, w, n) for p, w, n in inpts}
     [card.process() for card in cards.values()]
 
-    return sum(card.count for card in cards.values())+1
+    return sum(card.count for card in cards.values())
 
 
 def run():
