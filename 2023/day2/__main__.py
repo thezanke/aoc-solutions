@@ -50,10 +50,11 @@ def run():
     example1 = get_input("day2/example1.txt")
     final_input = get_input("day2/final_input.txt")
 
-    test("Day 2-1: Example 1", part1(example1), 8)
-    test("Day 2-1: Final Input", part1(final_input), 2545)
-    test("Day 2-2: Example 1", part2(example1), 2286)
-    test("Day 2-2: Final Input", part2(final_input), 78111)
+    test("Day 2-1:   Example 1", 8, part1, example1)
+    test("Day 2-1: Final Input", 2545, part1, final_input)
+    test("Day 2-2:   Example 1", 2286, part2, example1)
+    test("Day 2-2: Final Input", 78111, part2, final_input)
+
 
 if __name__ == "__main__":
     run()
