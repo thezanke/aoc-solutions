@@ -1,3 +1,6 @@
+from common import test
+
+
 def get_input(filename: str):
     with open(filename, "r") as file:
         return file.read().split("\n")
@@ -43,11 +46,14 @@ def part2(input: list[str]):
     return sum(powers)
 
 
-example1 = get_input("day2/example1.txt")
-assert part1(example1) == 8
-assert part2(example1) == 2286
+def run():
+    example1 = get_input("day2/example1.txt")
+    final_input = get_input("day2/final_input.txt")
 
+    test("Day 2-1: Example 1", part1(example1), 8)
+    test("Day 2-1: Final Input", part1(final_input), 2545)
+    test("Day 2-2: Example 1", part2(example1), 2286)
+    test("Day 2-2: Final Input", part2(final_input), 78111)
 
-final_input = get_input("day2/final_input.txt")
-assert part1(final_input) == 2545
-assert part2(final_input) == 78111
+if __name__ == "__main__":
+    run()

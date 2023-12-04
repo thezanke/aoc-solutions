@@ -1,18 +1,18 @@
-import re
+from common import test
 from typing import Any
+import re
 
 
 def get_input(filename: str):
     with open(filename, "r") as file:
         data = file.read()
         groups = re.findall(
-            r"^Card\s+(?P<row>\d+):\s+(?P<winning>(?:\s*\d+)+)\s\|\s+(?P<numbers>(?:\s*\d+)+).+$",
+            r"^Card\s+(?P<row>\d+):\s+(?P<winning>.+)\s\|\s+(?P<numbers>.+)$",
             data,
             flags=re.MULTILINE,
         )
 
         return groups
-        # return re.finditer(r"Card\s+\d+:(\s+\d)+\s\|(\s+\d)+", data, flags=re.MULTILINE)
 
 
 def get_numbers(string: str):
@@ -21,43 +21,35 @@ def get_numbers(string: str):
 
 def part1(inpt: Any):
     scores: list[int] = []
-    for row, winning, numbers in inpt:
-        print("row " + row)
-        winning = get_numbers(winning)
-        print(winning)
-        chances = get_numbers(numbers)
-        print(chances)
+
+    for _, winning, numbers in inpt:
         score = 0
 
+        winning = get_numbers(winning)
+        numbers = get_numbers(numbers)
+
         for winner in winning:
-            if winner in chances:
+            if winner in numbers:
                 score = 1 if not score else score * 2
 
-        print("score " + str(score))
         scores.append(score)
-    return scores
+
+    return sum(scores)
 
 
 def part2(inpt: Any):
     return 0
 
 
-example1 = get_input("day4/example1.txt")
+def run():
+    example1 = get_input("day4/example1.txt")
+    final_input = get_input("day4/final_input.txt")
 
-e1p1 = part1(example1)
-print(sum(e1p1))
 
+    test("Day 4-1: Example 1", part1(example1), 13)
+    test("Day 4-1: Final Input", part1(final_input), 26914)
+    test("Day 4-2: Example 1", part2(example1), 0)
+    test("Day 4-2: Final Input", part2(final_input), 0)
 
-# e1p2 = part2(example1)
-# print(e1p2)
-# assert e1p2 == 0
-
-# final_input = get_input("day4/final_input.txt")
-
-# p1 = part1(final_input)
-# print(p1)
-# assert p1 == 0
-
-# p2 = part2(final_input)
-# print(p2)
-# assert p2 == 0
+if __name__ == "__main__":
+    run()

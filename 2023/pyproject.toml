@@ -1,5 +1,5 @@
 [tool.poetry]
-name = "aoc-py"
+name = "aoc"
 version = "0.1.0"
 description = ""
 authors = ["Alex Howard <thezanke@gmail.com>"]
@@ -12,3 +12,6 @@ python = "^3.11"
 [build-system]
 requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
+
+[tool.poetry.scripts]
+suite = "aoc:run"
