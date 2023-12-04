@@ -16,8 +16,8 @@ def test(
 
     try:
         assert value == expected, "expected %r, got %r" % (expected, value)
-        res_str = "✅"
+        log = "✅"
     except AssertionError as e:
-        res_str = f"❌ %s" % e
+        log = f"❌ %s" % e
 
-    print(f"{label}: {res_str} (~{execution_time:.3f}s)")
+    print(f"{label}: {log} (~{execution_time:.3f}s)")
