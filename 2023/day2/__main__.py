@@ -1,4 +1,4 @@
-from common import test
+from common import expectation
 
 
 def get_input(filename: str):
@@ -50,10 +50,10 @@ def run():
     example1 = get_input("day2/example1.txt")
     final_input = get_input("day2/final_input.txt")
 
-    test("Day 2-1:   Example 1", 8, part1, example1)
-    test("Day 2-1: Final Input", 2545, part1, final_input)
-    test("Day 2-2:   Example 1", 2286, part2, example1)
-    test("Day 2-2: Final Input", 78111, part2, final_input)
+    expectation("Day 2-1:   Example 1", 8, part1, example1)
+    expectation("Day 2-1: Final Input", 2545, part1, final_input)
+    expectation("Day 2-2:   Example 1", 2286, part2, example1)
+    expectation("Day 2-2: Final Input", 78111, part2, final_input)
 
 
 if __name__ == "__main__":

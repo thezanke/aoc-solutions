@@ -1,4 +1,4 @@
-from common import test
+from common import expectation
 import re
 
 
@@ -80,10 +80,10 @@ def run():
     example1 = get_input("day3/example1.txt")
     final_input = get_input("day3/final_input.txt")
 
-    test("Day 3-1:   Example 1", 4361, part1, *example1)
-    test("Day 3-1: Final Input", 514969, part1, *final_input)
-    test("Day 3-2:   Example 1", 467835, part2, *example1)
-    test("Day 3-2: Final Input", 78915902, part2, *final_input)
+    expectation("Day 3-1:   Example 1", 4361, part1, *example1)
+    expectation("Day 3-1: Final Input", 514969, part1, *final_input)
+    expectation("Day 3-2:   Example 1", 467835, part2, *example1)
+    expectation("Day 3-2: Final Input", 78915902, part2, *final_input)
 
 
 if __name__ == "__main__":

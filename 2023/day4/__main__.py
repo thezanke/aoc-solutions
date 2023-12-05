@@ -1,4 +1,4 @@
-from common import test
+from common import expectation
 from typing import Any
 import re
 
@@ -62,10 +62,10 @@ def run():
     example1 = get_input("day4/example1.txt")
     final_input = get_input("day4/final_input.txt")
 
-    test("Day 4-1:   Example 1", 13, part1, example1)
-    test("Day 4-1: Final Input", 26914, part1, final_input)
-    test("Day 4-2:   Example 1", 30, part2, example1)
-    test("Day 4-2: Final Input", 13080971, part2, final_input)
+    expectation("Day 4-1:   Example 1", 13, part1, example1)
+    expectation("Day 4-1: Final Input", 26914, part1, final_input)
+    expectation("Day 4-2:   Example 1", 30, part2, example1)
+    expectation("Day 4-2: Final Input", 13080971, part2, final_input)
 
 
 if __name__ == "__main__":
