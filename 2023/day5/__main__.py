@@ -114,7 +114,7 @@ def part2(inpt: tuple[list[int], list[list[tuple[int, int, int]]]]):
             elapsed = timer_end - timer_start
             if i % 1000 == 0:
                 print(
-                    "%.4f" % (i / total) + "% complete in " + ("%.3f" % elapsed) + "s",
+                    "%.4f" % (i / total) + "% complete in " + ("%.1f" % elapsed) + "s",
                     end="\r",
                 )
 
