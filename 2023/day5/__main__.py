@@ -1,6 +1,7 @@
 import re
 import sys
 from common import chunk_list, expectation
+from timeit import default_timer as timer
 
 debugging = False
 
@@ -73,10 +74,13 @@ def part1(inpt: tuple[list[int], list[list[tuple[int, int, int]]]]):
 
     return lowest
 
+
 # New Idea.. what if I work backwards.... pre-cache the ranges from each category to the one before it;
 # then, once we reach seed, it should be easier to determine the final value quickly. TBD..
 def part2(inpt: tuple[list[int], list[list[tuple[int, int, int]]]]):
     global debugging
+
+    timer_start = timer()
 
     seeds, almanac = inpt
     debug_log("almanac: %s" % almanac)
@@ -106,8 +110,13 @@ def part2(inpt: tuple[list[int], list[list[tuple[int, int, int]]]]):
 
             i += 1
 
+            timer_end = timer()
+            elapsed = timer_end - timer_start
             if i % 1000 == 0:
-                print("%f" % (i / total) + "%", end="\r")
+                print(
+                    "%.4f" % (i / total) + "% complete in " + ("%.3f" % elapsed) + "s",
+                    end="\r",
+                )
 
     debug_log("\nlowest: %s\n" % lowest)
 
