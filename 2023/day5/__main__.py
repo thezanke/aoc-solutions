@@ -131,8 +131,6 @@ def generate_seed_to_location_map(almanac: Almanac):
     return seed_to_location
 
 
-# New Idea.. what if I work backwards.... pre-cache the ranges from each category to the one before it;
-# then, once we reach seed, it should be easier to determine the final value quickly. TBD..
 def part2(inpt: ParsedInput):
     timer_start = timer()
 

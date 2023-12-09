@@ -20,7 +20,7 @@ def expectation(
     except AssertionError as e:
         log = f"❌ %s" % e
 
-    print(f"{label}: {log} (~{execution_time:.3f}s)")
+    print(f"{label}: {log} (~{execution_time:.4f}s)")
 
 
 def chunk_list(input_list: list[Any], chunk_size: int):
