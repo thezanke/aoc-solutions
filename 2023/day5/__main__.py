@@ -1,8 +1,8 @@
 import re
 import sys
-from timeit import default_timer as timer
 from typing import Any, List, Optional, Tuple
-from common import chunk_list, expectation
+from common import expectation
+from enum import Enum
 
 debugging = False
 
@@ -15,7 +15,7 @@ def debug_log(
     sep: Optional[str] = " ",
     end: Optional[str] = "\n",
     file: Optional[IO[str]] = None,
-    flush: bool = False
+    flush: bool = False,
 ):
     global debugging
 
@@ -29,9 +29,30 @@ def debug_log(
         )
 
 
-CATEGORIES = ["seed", "soil", "fert", "water", "light", "temp", "humidity", "location"]
+class Category(Enum):
+    SEED = 0
+    SOIL = 1
+    FERT = 2
+    WATER = 3
+    LIGHT = 4
+    TEMP = 5
+    HUMIDITY = 6
+    LOCATION = 7
 
-MapList = List[tuple[int, int, int, int]]
+
+CATEGORIES = [
+    Category.SEED,
+    Category.SOIL,
+    Category.FERT,
+    Category.WATER,
+    Category.LIGHT,
+    Category.TEMP,
+    Category.HUMIDITY,
+    Category.LOCATION,
+]
+
+MapListEntry = tuple[int, int, int, int]
+MapList = List[MapListEntry]
 
 Almanac = List[MapList]
 ParsedInput = Tuple[list[int], Almanac]
@@ -57,7 +78,88 @@ def get_input(filename: str) -> ParsedInput:
             dest, start, range_len = split(line)
             data[-1] += [(start, start + range_len - 1, dest, dest + range_len - 1)]
 
-        return split(head[7:]), data
+        return split(head[7:]), [sorted(x, key=lambda x: x[2]) for x in data]
+
+
+def map_entry(entry: MapListEntry, mapper: MapListEntry) -> MapList:
+    a1, a2, ab1, ab2 = entry
+    b1, b2, bc1, _ = mapper
+    delta = bc1 - b1
+
+    if b1 <= ab1 and b2 >= ab2:  # completely contained
+        return [(a1, a2, ab1 + delta, ab2 + delta)]
+
+    parts: MapList = []
+    if ab1 <= b1 <= ab2 or ab1 <= b2 <= ab2:  # overlapped
+        # print(f"! {CATEGORIES[next_category]}{mapper}")
+        d1 = b1 - ab1
+        d2 = ab2 - b2
+        l = d1 > 0
+        r = d2 > 0
+
+        if l:
+            parts += [(a1, a1 - d1, ab1 - d1, ab2 - d2)]
+
+        parts += [
+            (
+                a1 + d1 + 1 if l else a1,
+                a2 - d2 if r else a2,
+                (ab1 + d1 + 1 if l else ab1) + delta,
+                (ab2 - d2 if r else ab2) + delta,
+            )
+        ]
+
+        if r:
+            parts += [(a2 - d2 + 1, a2, b2 + 1, ab2)]
+
+    return parts
+
+
+def upgrade_seed_map(
+    input_list: MapList,
+    almanac: Almanac,
+    target_category: int = Category.LOCATION.value,
+    next_category: int = Category.SOIL.value,
+) -> MapList:
+    print(f"\nINPUT (SEED-TO-{CATEGORIES[next_category].name}): {input_list}")
+    next_map = almanac[next_category]
+    print(f"NEXT({CATEGORIES[next_category]}): {next_map}")
+    output_list: MapList = []
+    for entry in input_list:
+        # print(f"* entry: {entry}")
+
+        parts: MapList = []
+
+        for mapper in next_map:
+            parts += map_entry(entry, mapper)
+
+        if not len(parts):
+            parts += [entry]
+
+        # print(f"! MAPPED => {parts}")
+        output_list += parts
+
+    print(f"SEED-TO-{CATEGORIES[next_category+1].name}: {output_list}")
+
+    if next_category < target_category:
+        return upgrade_seed_map(
+            output_list, almanac, target_category, next_category + 1
+        )
+
+    return output_list
+
+
+def simplify_almanac(almanac: Almanac):
+    seed_map = almanac[Category.SEED.value]
+    print(almanac)
+    # print(soil_map)
+    # print(seed_map)
+
+    seed_to_location: MapList = upgrade_seed_map(
+        seed_map, almanac, Category.HUMIDITY.value
+    )
+
+    return seed_to_location
 
 
 def part1(inpt: ParsedInput):
@@ -66,20 +168,18 @@ def part1(inpt: ParsedInput):
     debug_log("almanac: %s" % almanac)
     debug_log("seeds: %r" % seeds)
 
+    simple_almanac = simplify_almanac(almanac)
     lowest = sys.maxsize
 
     for num in seeds:
         debug_log("\nseed: %s" % num)
 
-        for category in range(len(CATEGORIES) - 1):
-            for start, end, dest, _ in almanac[category]:
-                if start <= num <= end:
-                    debug_log("  ! found %r in %r" % (num, (start, end, dest)))
+        for start, end, dest, _ in simple_almanac:
+            if start <= num <= end:
+                debug_log("  ! found %r in %r" % (num, (start, end, dest)))
 
-                    num = dest + num - start
-                    break
-
-            debug_log("  => %s %s" % (num, CATEGORIES[category + 1]))
+                num = dest + num - start
+                break
 
         if num < lowest:
             lowest = num
@@ -89,105 +189,101 @@ def part1(inpt: ParsedInput):
     return lowest
 
 
-def convert_to_next_category(
-    input_list: MapList,
-    output_map: MapList,
-):
-    # output_list: MapList = []
-
-    for inpt in input_list:
-        debug_log(inpt)
-        for outpt in output_map:
-            overlaps = max(inpt[2], outpt[3]) <= min(inpt[1], outpt[1])
-            if overlaps:
-                debug_log(
-                    "  ! found %r in %r" % ((inpt[2], inpt[3]), (outpt[0], outpt[1]))
-                )
-
-    return input_list
-
-
-def generate_seed_to_location_map(almanac: Almanac):
-    seed_to_location: MapList = almanac[0].copy()
-
-    for dest_cat_id in range(1, len(CATEGORIES) - 1):
-        src_cat_id = dest_cat_id - 1
-
-        debug_log(
-            "%s %s -> %s %s"
-            % (
-                src_cat_id,
-                CATEGORIES[src_cat_id],
-                dest_cat_id,
-                CATEGORIES[dest_cat_id],
-            )
-        )
-
-        seed_to_location = convert_to_next_category(
-            seed_to_location,
-            almanac[dest_cat_id],
-        )
-
-    return seed_to_location
-
-
 def part2(inpt: ParsedInput):
-    timer_start = timer()
+    _, almanac = inpt
+    almanac = simplify_almanac(almanac)
 
-    seeds, almanac = inpt
-    debug_log("almanac: %s" % almanac)
-    debug_log("seeds: %r" % seeds)
+    return 0
 
-    seed_to_location = generate_seed_to_location_map(almanac)
-    debug_log("seed_to_location: %r" % seed_to_location)
 
-    lowest = sys.maxsize
-    i = 0
-    chunks: list[list[int]] = chunk_list(seeds, 2)
-    total = sum(chunk[1] for chunk in chunks)
+# def generate_seed_to_location_map(almanac: Almanac):
+#     seed_to_location: MapList = almanac[0].copy()
 
-    for start, size in chunks:
-        for num in range(start, start + size):
-            debug_log("\nseed: %s" % num)
+#     for dest_cat_id in range(1, len(CATEGORIES) - 1):
+#         src_cat_id = dest_cat_id - 1
 
-            for category in range(len(CATEGORIES) - 1):
-                for start, end, dest, _ in almanac[category]:
-                    if start <= num <= end:
-                        debug_log("  ! found %r in %r" % (num, (start, end, dest)))
+#         debug_log(
+#             "%s %s -> %s %s"
+#             % (
+#                 src_cat_id,
+#                 CATEGORIES[src_cat_id],
+#                 dest_cat_id,
+#                 CATEGORIES[dest_cat_id],
+#             )
+#         )
 
-                        num = dest + num - start
-                        break
+#         seed_to_location = convert_to_next_category(
+#             seed_to_location,
+#             almanac[dest_cat_id],
+#         )
 
-                debug_log("  => %s %s" % (num, CATEGORIES[category + 1]))
+#     return seed_to_location
 
-            if num < lowest:
-                lowest = num
 
-            i += 1
+# def part2(inpt: ParsedInput):
+#     timer_start = timer()
 
-            elapsed = timer() - timer_start
-            if i % 1000 == 0:
-                print(
-                    ("%.4f" % (i / total))
-                    + "% complete in "
-                    + ("%.1f" % elapsed)
-                    + " sec",
-                    end="\r",
-                )
+#     seeds, almanac = inpt
+#     debug_log("almanac: %s" % almanac)
+#     debug_log("seeds: %r" % seeds)
 
-    debug_log("\nlowest: %s\n" % lowest)
+#     seed_to_location = generate_seed_to_location_map(almanac)
+#     debug_log("seed_to_location: %r" % seed_to_location)
 
-    return lowest
+#     lowest = sys.maxsize
+#     i = 0
+#     chunks: list[list[int]] = chunk_list(seeds, 2)
+#     total = sum(chunk[1] for chunk in chunks)
+
+#     for start, size in chunks:
+#         for num in range(start, start + size):
+#             debug_log("\nseed: %s" % num)
+
+#             for category in range(len(CATEGORIES) - 1):
+#                 for start, end, dest, _ in almanac[category]:
+#                     if start <= num <= end:
+#                         debug_log("  ! found %r in %r" % (num, (start, end, dest)))
+
+#                         num = dest + num - start
+#                         break
+
+#                 debug_log("  => %s %s" % (num, CATEGORIES[category + 1]))
+
+#             if num < lowest:
+#                 lowest = num
+
+#             i += 1
+
+#             elapsed = timer() - timer_start
+#             if i % 1000 == 0:
+#                 print(
+#                     ("%.4f" % (i / total))
+#                     + "% complete in "
+#                     + ("%.1f" % elapsed)
+#                     + " sec",
+#                     end="\r",
+#                 )
+
+#     debug_log("\nlowest: %s\n" % lowest)
+
+#     return lowest
 
 
 def run():
     example1 = get_input("day5/example1.txt")
-    final_input = get_input("day5/final_input.txt")
+    # final_input = get_input("day5/final_input.txt")
 
-    expectation("Day 5-1:   Example 1", 35, part1, example1)
-    expectation("Day 5-1: Final Input", 551761867, part1, final_input)
-    expectation("Day 5-2:   Example 1", 46, part2, example1)
-    expectation("Day 5-2: Final Input", 2, part2, final_input)
+    expectation(
+        "Day 5-1:   Example 1",
+        [(52, 58, 50, 56), (59, 97, 57, 99)],
+        map_entry,
+        (52, 97, 54, 99),
+        (53, 60, 49, 56),
+    )
+    # expectation("Day 5-1:   Example 1", 35, part1, example1)
+    # expectation("Day 5-1: Final Input", 551761867, part1, final_input)
+    # expectation("Day 5-2:   Example 1", 46, part2, example1)
+    # expectation("Day 5-2: Final Input", 2, part2, final_input)
 
 
 if __name__ == "__main__":
