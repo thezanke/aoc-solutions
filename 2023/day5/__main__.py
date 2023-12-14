@@ -270,12 +270,26 @@ def part2(inpt: ParsedInput):
 
 
 def run():
-    example1 = get_input("day5/example1.txt")
+    # example1 = get_input("day5/example1.txt")
     # final_input = get_input("day5/final_input.txt")
 
     expectation(
-        "Day 5-1:   Example 1",
-        [(52, 58, 50, 56), (59, 97, 57, 99)],
+        "Day 5-1:   map_entry",
+        [(98, 99, 35, 36)],
+        map_entry,
+        (98, 99, 50, 51),
+        (15, 51, 0, 36),
+    )
+    expectation(
+        "Day 5-1:   map_entry",
+        [(50, 51, 37, 38), (52, 97, 54, 99)],
+        map_entry,
+        (50, 97, 52, 99),
+        (52, 53, 37, 38),
+    )
+    expectation(
+        "Day 5-1:   map_entry",
+        [(52, 58, 50, 56), (59, 97, 61, 99)],
         map_entry,
         (52, 97, 54, 99),
         (53, 60, 49, 56),
