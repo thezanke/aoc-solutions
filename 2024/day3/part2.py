@@ -1,13 +1,11 @@
-import os
 import re
 
-from part1 import count_matches
+from part1 import count_matches, final
 
 DO_SPLITTER = r"do\(\)"
 DONT_SPLITTER = r"don\'t\(\)"
 
 example = "xmul(2,4)&mul[3,7]!^don't()_mul(5,5)+mul(32,64](mul(11,8)undo()?mul(8,5))"
-final = open(os.path.join(os.path.dirname(__file__), "input.txt")).read()
 
 
 def solve(data: str):
